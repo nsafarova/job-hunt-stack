@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Stack — Job Hunt Resources</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --ink:#1C1B19;
+    --paper:#F7F4EC;
+    --paper-dim:#EFEAE0;
+    --red:#C0392B;
+    --teal:#3E6259;
+    --gray:#8A8275;
+    --line: rgba(28,27,25,0.14);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Mono', monospace;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3{
+    font-family:'Source Serif 4', serif;
+    margin:0;
+    font-weight:700;
+  }
+
+  a{color:inherit;}
+
+  /* ===== Header ===== */
+  .masthead{
+    border-bottom:2px solid var(--ink);
+    padding:28px 24px 18px;
+    max-width:1100px;
+    margin:0 auto;
+  }
+  .masthead-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .masthead h1{
+    font-size:clamp(28px,5vw,42px);
+    letter-spacing:-0.5px;
+  }
+  .masthead h1 em{
+    font-style:italic;
+    color:var(--red);
+  }
+  .meta-line{
+    font-size:11px;
+    color:var(--gray);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+  }
+  .tagline{
+    margin-top:6px;
+    font-size:13px;
+    color:var(--gray);
+    max-width:520px;
+  }
+
+  /* ===== Layout ===== */
+  .wrap{
+    max-width:1100px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:200px 1fr;
+    gap:0;
+  }
+  @media (max-width:760px){
+    .wrap{grid-template-columns:1fr;}
+  }
+
+  /* ===== Sidebar / tabs ===== */
+  .rail{
+    border-right:1px solid var(--line);
+    padding:24px 16px;
+  }
+  @media (max-width:760px){
+    .rail{
+      border-right:none;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      overflow-x:auto;
+      gap:8px;
+      padding:16px;
+    }
+  }
+  .rail-label{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--gray);
+    margin-bottom:12px;
+  }
+  @media (max-width:760px){ .rail-label{display:none;} }
+
+  .tab{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    width:100%;
+    text-align:left;
+    background:none;
+    border:none;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--ink);
+    padding:9px 10px;
+    margin-bottom:4px;
+    cursor:pointer;
+    border-radius:3px;
+    position:relative;
+    white-space:nowrap;
+  }
+  .tab:hover{ background:var(--paper-dim); }
+  .tab.active{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .tab .count{
+    font-size:11px;
+    color:var(--gray);
+    font-weight:500;
+  }
+  .tab.active .count{ color:rgba(247,244,236,0.6); }
+
+  .tab-folder{
+    position:relative;
+    margin-bottom:4px;
+  }
+  .tab-folder::before{
+    content:'';
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width:3px;
+    border-radius:2px;
+  }
+  .tab-folder[data-cat="resume"]::before{ background:var(--red); }
+  .tab-folder[data-cat="interview"]::before{ background:var(--teal); }
+  .tab-folder[data-cat="networking"]::before{ background:#9B7A3C; }
+  .tab-folder[data-cat="leads"]::before{ background:#5B6FA3; }
+  .tab-folder[data-cat="tools"]::before{ background:#7A5C8E; }
+  .tab-folder[data-cat="learning"]::before{ background:var(--gray); }
+  .tab-folder .tab{ padding-left:16px; }
+
+  /* ===== Search + add ===== */
+  .toolbar{
+    padding:24px 24px 0;
+  }
+  .search-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .search-row input[type="text"]{
+    flex:1;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    padding:10px 12px;
+    border:1px solid var(--ink);
+    background:var(--paper);
+    border-radius:3px;
+    color:var(--ink);
+  }
+  .search-row input[type="text"]:focus{ outline:2px solid var(--red); outline-offset:-1px; }
+
+  .btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    padding:10px 16px;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:3px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .btn:hover{ background:#3a3835; }
+  .btn.secondary{
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .btn.secondary:hover{ background:var(--paper-dim); }
+  .btn:focus-visible, .tab:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
+    outline:2px solid var(--red);
+    outline-offset:2px;
+  }
+
+  /* ===== Add form ===== */
+  .add-panel{
+    border:1px solid var(--ink);
+    border-radius:4px;
+    margin-bottom:18px;
+    overflow:hidden;
+    display:none;
+  }
+  .add-panel.open{ display:block; }
+  .add-panel-inner{
+    padding:18px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .add-panel-inner .full{ grid-column:1 / -1; }
+  .field label{
+    display:block;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--gray);
+    margin-bottom:4px;
+  }
+  .field input, .field select{
+    width:100%;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .add-panel-actions{
+    grid-column:1 / -1;
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+    margin-top:4px;
+  }
+  .form-error{
+    grid-column:1/-1;
+    font-size:12px;
+    color:var(--red);
+    display:none;
+  }
+
+  /* ===== Resource list ===== */
+  .list{
+    padding:6px 24px 40px;
+  }
+  .group-heading{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--gray);
+    padding:18px 0 8px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:4px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .group-heading .dot{
+    width:7px; height:7px; border-radius:50%;
+  }
+
+  .card{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:6px 16px;
+    align-items:start;
+    padding:14px 4px;
+    border-bottom:1px solid var(--line);
+  }
+  .card:hover{ background:rgba(28,27,25,0.025); }
+  .card-title{
+    font-family:'Source Serif 4', serif;
+    font-size:16px;
+    font-weight:600;
+    line-height:1.3;
+  }
+  .card-title a{ text-decoration:none; }
+  .card-title a:hover{ color:var(--red); text-decoration:underline; }
+  .card-meta{
+    font-size:11px;
+    color:var(--gray);
+    margin-top:3px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .card-meta .src{ color:var(--teal); }
+  .card-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .icon-btn{
+    background:none;
+    border:none;
+    color:var(--gray);
+    cursor:pointer;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    padding:4px 6px;
+  }
+  .icon-btn:hover{ color:var(--red); }
+
+  .empty-state{
+    padding:50px 4px;
+    text-align:center;
+    color:var(--gray);
+  }
+  .empty-state .big{
+    font-family:'Source Serif 4', serif;
+    font-size:20px;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+
+  .footer-note{
+    text-align:center;
+    font-size:11px;
+    color:var(--gray);
+    padding:20px 24px 40px;
+  }
+
+  .loading{
+    padding:40px;
+    text-align:center;
+    color:var(--gray);
+    font-size:13px;
+  }
+
+  .badge{
+    display:inline-block;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    padding:2px 6px;
+    border-radius:2px;
+    background:var(--paper-dim);
+    color:var(--gray);
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-top">
+    <h1>The <em>Stack</em></h1>
+    <div class="meta-line" id="totalCount">— resources filed</div>
+  </div>
+  <div class="tagline">Every job-hunt link, template, and tip worth keeping, in one place. Filed by category so nothing gets lost in a chat thread again.</div>
+</div>
+
+<div class="wrap">
+  <div class="rail" id="rail">
+    <div class="rail-label">Categories</div>
+    <!-- tabs injected here -->
+  </div>
+
+  <div>
+    <div class="toolbar">
+      <div class="search-row">
+        <input type="text" id="searchInput" placeholder="Search titles, sources, notes…">
+        <button class="btn secondary" id="toggleAddBtn">+ Add</button>
+      </div>
+
+      <div class="add-panel" id="addPanel">
+        <div class="add-panel-inner">
+          <div class="field full">
+            <label for="f-title">Title</label>
+            <input type="text" id="f-title" placeholder="e.g. Cold Email Template">
+          </div>
+          <div class="field full">
+            <label for="f-url">Link</label>
+            <input type="text" id="f-url" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label for="f-category">Category</label>
+            <select id="f-category">
+              <option value="resume">Resume &amp; Resources</option>
+              <option value="interview">Interview Prep</option>
+              <option value="networking">Networking &amp; Outreach</option>
+              <option value="leads">Job Leads</option>
+              <option value="tools">Tools</option>
+              <option value="learning">Learning &amp; Frameworks</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-source">Source (who/where)</label>
+            <input type="text" id="f-source" placeholder="e.g. Instagram, Nikita">
+          </div>
+          <div class="form-error" id="formError">Add a title and a link.</div>
+          <div class="add-panel-actions">
+            <button class="btn secondary" id="cancelAddBtn">Cancel</button>
+            <button class="btn" id="saveAddBtn">Save resource</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="list" id="list">
+      <div class="loading">Loading your stack…</div>
+    </div>
+
+    <div class="footer-note">Stored privately in this artifact. Only you can see what's filed here.</div>
+  </div>
+</div>
+
+<script>
+const CATEGORIES = [
+  { id: 'resume', label: 'Resume & Resources', color: 'var(--red)' },
+  { id: 'interview', label: 'Interview Prep', color: 'var(--teal)' },
+  { id: 'networking', label: 'Networking & Outreach', color: '#9B7A3C' },
+  { id: 'leads', label: 'Job Leads', color: '#5B6FA3' },
+  { id: 'tools', label: 'Tools', color: '#7A5C8E' },
+  { id: 'learning', label: 'Learning & Frameworks', color: 'var(--gray)' },
+];
+
+const SEED_RESOURCES = [
+  { id:'s1', title:'Claude Prompts to Land Internships', url:'https://docs.google.com/document/d/1M_VnZbWjSRmxIhZw86ty0c4z2VAHNI0DJtErdkAIpFg/mobilebasic', category:'resume', source:'Job Hunt Strategies doc' },
+  { id:'s2', title:'Cold Email Template', url:'https://generationshe.notion.site/Cold-Email-Template-738f71bc8a274d40b32d097db812908d', category:'networking', source:'Generation She' },
+  { id:'s3', title:'4 Claude Skills That Make Your Resume Unrejectable', url:'https://www.notion.so/4-Claude-skills-that-make-your-resume-unrejectable-35deecf1692780818d31f988b2cb0e72', category:'resume', source:'Notion' },
+  { id:'s4', title:'PM Career Playbook', url:'https://docs.google.com/document/d/101mi8Ior5Hv3uG8BGrX1qnWzilyHbDXl1uhjba-8HCE/mobilebasic', category:'learning', source:'Nikita' },
+  { id:'s5', title:'6 Month Roadmap to PM in Big Tech', url:'https://docs.google.com/document/d/1-GxtaYMNdmqF5dzemY0Cm2GvntyDeXRC/mobilebasic', category:'learning', source:'Google Doc' },
+  { id:'s6', title:'The 3 DM Referral Strategy', url:'https://docs.google.com/document/d/1Fzi5Jj4wblZY2nD1SQWiR6ouMttYP4O4-NQecWfVKHI/mobilebasic', category:'networking', source:'Google Doc' },
+  { id:'s7', title:'5 ChatGPT Prompts to Edit Resume', url:'https://docs.google.com/document/d/1U0BNkOwahZC2TClLLUD2YQTuL0rSeg_RgMaSt6BF9NM/mobilebasic', category:'resume', source:'Google Doc' },
+  { id:'s8', title:'Offers from Microsoft, Google, Meta', url:'https://docs.google.com/document/d/1YC76Yt1kHSGyOqdvwnFU9NIyYyL0Ixz7D4ZffWrC8e4/mobilebasic', category:'interview', source:'Google Doc' },
+  { id:'s9', title:'LinkedIn Optimization — 5 Prompts + Cold Outreach', url:'https://drive.google.com/file/d/1ACLjSSO-4YbikknjXJWJWI36NMDoMLgV/view?usp=drivesdk', category:'networking', source:'Google Drive' },
+  { id:'s10', title:'PRIME Big Tech Interview Prep Guide', url:'https://docs.google.com/document/d/1RerAsQMKFT6Y3l82SdSYDPCKtBgO9pxC4asqec0GEGc/mobilebasic', category:'interview', source:'Google Doc' },
+  { id:'s11', title:'How She Got Her Microsoft Internship — Tips', url:'https://www.instagram.com/p/DVfolJvjea-/?igsh=MTQxeXJ0dDBjbG9iOA==', category:'interview', source:'Instagram' },
+  { id:'s12', title:'27 Startups That Just Raised Funding (Likely Hiring)', url:'https://lnkd.in/gQjdbhcX', category:'leads', source:'Kyle Thomas' },
+  { id:'s13', title:'34 Companies That Just Raised $10–50M, Now Hiring', url:'https://lnkd.in/gCfqu52K', category:'leads', source:'Ben Lang' },
+  { id:'s14', title:'8 Remote-Friendly Companies With WFA Schemes', url:'https://lnkd.in/gmyQckyW', category:'leads', source:'Rita Batalha' },
+  { id:'s15', title:'20 New Junior/Mid Full Remote Opportunities', url:'https://lnkd.in/gVcDpvWB', category:'leads', source:'Mirko Minenza' },
+  { id:'s16', title:'50 Best Employers to Grow Your Career (US & Canada)', url:'https://lnkd.in/gjjVc4cf', category:'leads', source:'Jean Kang' },
+  { id:'s17', title:'The Best LLM for Your Job Search', url:'https://lnkd.in/gPYqeC7A', category:'tools', source:'Rathnakumar Udayakumar' },
+  { id:'s18', title:'Free Claude Skill — Prep Like Google Candidates', url:'https://lnkd.in/gZT2kbcU', category:'interview', source:'Tomi Gbeleyi' },
+  { id:'s19', title:'What to Do When You Blank on an Interview Question', url:'https://lnkd.in/g-Jry8uV', category:'interview', source:'Yauhan Mehta' },
+  { id:'s20', title:'15 Prompts for Interview Prep', url:'https://lnkd.in/gweNjY98', category:'interview', source:'Jonathan Whipple' },
+  { id:'s21', title:'12 Job Interview Questions With Answers', url:'https://lnkd.in/g_7xcF_s', category:'interview', source:'Anna Chernyshova' },
+  { id:'s22', title:'10 Interview Phrases That Quietly Cost People Offers', url:'https://lnkd.in/gw9dZ84N', category:'interview', source:'Yauhan Mehta' },
+  { id:'s23', title:'McKinsey 7-Step Problem Solving Approach', url:'https://www.mckinsey.com/featured-insights', category:'learning', source:'McKinsey' },
+  { id:'s24', title:'Farnam Street Blog — Mental Models & Decision Making', url:'https://fs.blog', category:'learning', source:'Farnam Street' },
+  { id:'s25', title:'CaseInterview.com Articles', url:'https://www.caseinterview.com', category:'learning', source:'Victor Cheng' },
+  { id:'s26', title:'Pyramid Principle — Free Summaries', url:'https://www.google.com/search?q=Pyramid+Principle+PDF+summary', category:'learning', source:'Various' },
+  { id:'s27', title:'HBR: Communication', url:'https://hbr.org', category:'learning', source:'Harvard Business Review' },
+  { id:'s28', title:'Nancy Duarte Blog — Slide Design & Storytelling', url:'https://www.duarte.com', category:'learning', source:'Duarte' },
+  { id:'s29', title:'Strategy+Business by PwC', url:'https://www.strategy-business.com', category:'learning', source:'PwC' },
+  { id:'s30', title:'BCG Insights', url:'https://www.bcg.com/insights', category:'learning', source:'BCG' },
+  { id:'s31', title:'Bain Insights', url:'https://www.bain.com/insights', category:'learning', source:'Bain' },
+  { id:'s32', title:'Morning Brew Newsletter', url:'https://www.morningbrew.com', category:'learning', source:'Morning Brew' },
+  { id:'s33', title:'Consulting.us Industry News', url:'https://www.consulting.us', category:'learning', source:'Consulting.us' },
+  { id:'s34', title:'Farnam Street Weekly Digest', url:'https://fs.blog/newsletter', category:'learning', source:'Farnam Street' },
+  { id:'s35', title:'Ali Abdaal Blog & YouTube', url:'https://aliabdaal.com', category:'learning', source:'Ali Abdaal' },
+  { id:'s36', title:'The Knowledge Project Podcast', url:'https://fs.blog/knowledge-project-podcast', category:'learning', source:'Farnam Street' },
+  { id:'s37', title:'Notion Blog — Knowledge Management', url:'https://www.notion.so/blog', category:'learning', source:'Notion' },
+  { id:'s38', title:'Teal', url:'https://www.tealhq.com', category:'tools', source:'Tool list' },
+  { id:'s39', title:'Perplexity', url:'https://www.perplexity.ai', category:'tools', source:'Tool list' },
+  { id:'s40', title:'Canva', url:'https://www.canva.com', category:'tools', source:'Tool list' },
+  { id:'s41', title:'Glassdoor', url:'https://www.glassdoor.com', category:'tools', source:'Tool list' },
+  { id:'s42', title:'Comet — Auto-Apply Tool', url:'https://www.perplexity.ai/comet', category:'tools', source:'Tool list' },
+];
+
+const SUPABASE_URL = 'https://rcvwuyixsxxfwtkjepsj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_KuyfnYLxWnLBMosVdPVpxg_RrGJCTq_';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let resources = [];
+let activeCategory = 'all';
+let searchTerm = '';
+
+function catInfo(id){
+  return CATEGORIES.find(c => c.id === id) || { id, label: id, color: 'var(--gray)' };
+}
+
+async function loadResources(){
+  try{
+    const { data, error } = await supabase
+      .from('resources')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if(error) throw error;
+
+    if(data && data.length > 0){
+      resources = data;
+    } else {
+      // First run: seed the table with starter resources
+      const seedRows = SEED_RESOURCES.map(({ id, ...rest }) => rest);
+      const { data: inserted, error: insertError } = await supabase
+        .from('resources')
+        .insert(seedRows)
+        .select();
+      if(insertError) throw insertError;
+      resources = inserted || [];
+    }
+  }catch(e){
+    console.error('Supabase load error', e);
+    document.getElementById('list').innerHTML = `<div class="empty-state">
+      <div class="big">Couldn't connect to the database</div>
+      <div>Check your connection and refresh. (${escapeHtml(e.message || '')})</div>
+    </div>`;
+    return;
+  }
+  render();
+}
+
+function renderTabs(){
+  const rail = document.getElementById('rail');
+  const label = rail.querySelector('.rail-label');
+  rail.innerHTML = '';
+  rail.appendChild(label);
+
+  const allBtn = document.createElement('button');
+  allBtn.className = 'tab' + (activeCategory === 'all' ? ' active' : '');
+  allBtn.innerHTML = `<span>All resources</span><span class="count">${resources.length}</span>`;
+  allBtn.onclick = () => { activeCategory = 'all'; render(); };
+  rail.appendChild(allBtn);
+
+  CATEGORIES.forEach(cat => {
+    const count = resources.filter(r => r.category === cat.id).length;
+    const folder = document.createElement('div');
+    folder.className = 'tab-folder';
+    folder.dataset.cat = cat.id;
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (activeCategory === cat.id ? ' active' : '');
+    btn.innerHTML = `<span>${cat.label}</span><span class="count">${count}</span>`;
+    btn.onclick = () => { activeCategory = cat.id; render(); };
+    folder.appendChild(btn);
+    rail.appendChild(folder);
+  });
+}
+
+function getDomain(url){
+  try{
+    return new URL(url).hostname.replace('www.','');
+  }catch(e){
+    return '';
+  }
+}
+
+function renderList(){
+  const list = document.getElementById('list');
+  let filtered = resources.filter(r => {
+    const matchesCat = activeCategory === 'all' || r.category === activeCategory;
+    const haystack = `${r.title} ${r.source||''} ${r.category}`.toLowerCase();
+    const matchesSearch = !searchTerm || haystack.includes(searchTerm.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
+
+  if(filtered.length === 0){
+    list.innerHTML = `<div class="empty-state">
+      <div class="big">Nothing filed here yet</div>
+      <div>Try a different category, or add a resource above.</div>
+    </div>`;
+    return;
+  }
+
+  if(activeCategory !== 'all'){
+    list.innerHTML = filtered.map(r => cardHtml(r)).join('');
+    return;
+  }
+
+  // Grouped by category when viewing "all"
+  let html = '';
+  CATEGORIES.forEach(cat => {
+    const items = filtered.filter(r => r.category === cat.id);
+    if(items.length === 0) return;
+    html += `<div class="group-heading"><span class="dot" style="background:${cat.color}"></span>${cat.label} <span style="color:var(--gray)">(${items.length})</span></div>`;
+    html += items.map(r => cardHtml(r)).join('');
+  });
+  list.innerHTML = html;
+}
+
+function cardHtml(r){
+  const domain = getDomain(r.url);
+  const cat = catInfo(r.category);
+  return `<div class="card">
+    <div>
+      <div class="card-title"><a href="${escapeAttr(r.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.title)}</a></div>
+      <div class="card-meta">
+        ${activeCategory !== 'all' ? '' : `<span class="badge">${escapeHtml(cat.label)}</span>`}
+        ${r.source ? `<span class="src">${escapeHtml(r.source)}</span>` : ''}
+        ${domain ? `<span>${escapeHtml(domain)}</span>` : ''}
+      </div>
+    </div>
+    <div class="card-actions">
+      <button class="icon-btn" onclick="deleteResource('${r.id}')">Remove</button>
+    </div>
+  </div>`;
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+function escapeAttr(str){
+  return (str || '').replace(/"/g, '&quot;');
+}
+
+async function deleteResource(id){
+  const { error } = await supabase.from('resources').delete().eq('id', id);
+  if(error){
+    console.error('Delete error', error);
+    alert('Could not remove that resource. Try again.');
+    return;
+  }
+  resources = resources.filter(r => r.id !== id);
+  render();
+}
+
+function render(){
+  document.getElementById('totalCount').textContent = `${resources.length} resource${resources.length === 1 ? '' : 's'} filed`;
+  renderTabs();
+  renderList();
+}
+
+// Search
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  searchTerm = e.target.value;
+  renderList();
+});
+
+// Add panel toggling
+const addPanel = document.getElementById('addPanel');
+document.getElementById('toggleAddBtn').onclick = () => {
+  addPanel.classList.toggle('open');
+  if(addPanel.classList.contains('open')) document.getElementById('f-title').focus();
+};
+document.getElementById('cancelAddBtn').onclick = () => {
+  addPanel.classList.remove('open');
+  clearForm();
+};
+
+function clearForm(){
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-url').value = '';
+  document.getElementById('f-source').value = '';
+  document.getElementById('f-category').value = 'resume';
+  const errorEl = document.getElementById('formError');
+  errorEl.textContent = 'Add a title and a link.';
+  errorEl.style.display = 'none';
+}
+
+document.getElementById('saveAddBtn').onclick = async () => {
+  const title = document.getElementById('f-title').value.trim();
+  let url = document.getElementById('f-url').value.trim();
+  const category = document.getElementById('f-category').value;
+  const source = document.getElementById('f-source').value.trim();
+  const errorEl = document.getElementById('formError');
+
+  if(!title || !url){
+    errorEl.style.display = 'block';
+    return;
+  }
+  if(!/^https?:\/\//i.test(url)){
+    url = 'https://' + url;
+  }
+  errorEl.style.display = 'none';
+
+  const saveBtn = document.getElementById('saveAddBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
+
+  const { data, error } = await supabase
+    .from('resources')
+    .insert([{ title, url, category, source }])
+    .select();
+
+  saveBtn.disabled = false;
+  saveBtn.textContent = 'Save resource';
+
+  if(error){
+    console.error('Insert error', error);
+    errorEl.textContent = 'Could not save. Check your connection and try again.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if(data && data[0]) resources.unshift(data[0]);
+  clearForm();
+  addPanel.classList.remove('open');
+  activeCategory = category;
+  render();
+};
+
+loadResources();
+</script>
+
+</body>
+</html>
